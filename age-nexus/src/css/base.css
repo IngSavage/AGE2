@@ -78,24 +78,19 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent); box-sha
 .volume-control {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 6px 8px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-  margin: 0 12px;
 }
 
 .volume-icon {
-  font-size: 1.1rem;
-  min-width: 20px;
+  font-size: 1rem;
+  min-width: 16px;
 }
 
 .volume-slider {
-  width: 100px;
-  height: 4px;
-  appearance: none;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
+  width: 70px;
   outline: none;
   cursor: pointer;
 }
