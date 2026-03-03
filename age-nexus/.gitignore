@@ -1,7 +1,0 @@
-# Static site build artifacts
-node_modules/
-.DS_Store
-
-# backend
-/backend/node_modules/
-/backend/.env
