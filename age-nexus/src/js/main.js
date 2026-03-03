@@ -41,7 +41,7 @@
   }
 
   function highlightActiveLink() {
-    const fromTop = window.scrollY + 140;
+    const fromTop = window.scrollY + 90;
     const links = document.querySelectorAll('.nav-link');
     links.forEach(link => link.classList.remove('active'));
     document.querySelectorAll('section').forEach(section => {
@@ -154,7 +154,7 @@
   // 1) Acércate a la sección
   section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  const OFFSET = 120;        // compensa tu topbar sticky (ajusta 110-140 si quieres)
+  const OFFSET = 90;        // compensa tu topbar sticky (ajusta si quieres)
   const MAX_TRIES = 25;      // reintentos
   const TRY_EVERY_MS = 120;  // cada cuánto reintenta
 

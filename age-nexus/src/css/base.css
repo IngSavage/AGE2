@@ -36,7 +36,7 @@ img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 button, select, input, textarea { font: inherit; color: inherit; }
 
-section { scroll-margin-top: 96px; }
+section { scroll-margin-top: 70px; }
 
 .eyebrow { text-transform: uppercase; letter-spacing: 3px; color: var(--accent); font-weight: 700; font-size: 0.8rem; }
 .lede { max-width: 620px; font-size: 1.1rem; }
