@@ -17,8 +17,7 @@ function makeMap(m) {
 
     // contenido
     description: m.description ?? '',
-    // normalize id for filename: replace hyphens with underscores and lowercase
-    image: m.image ?? `src/assets/img/Maps/rm_${m.id.replace(/-/g, '_').toLowerCase()}.png`,
+    image: m.image ?? `src/assets/img/Maps/rm_${m.id}.png`,
     strong: m.strong ?? { civ: '—', winrate: '—' },
     weak: m.weak ?? { civ: '—', winrate: '—' },
     builds: Array.isArray(m.builds) ? m.builds : []
@@ -112,6 +111,7 @@ const MAPS = [
     water: 'parcial',
     duration: 'media',
     description: 'Oro central. Peleas tempranas.',
+    image: 'src/assets/img/Maps/rm_gold-rush.png',
     strong: { civ: 'Lituanos', winrate: 54 },
     weak: { civ: 'Godos', winrate: 46 },
     builds: ['Fast Castle Knights']
@@ -127,6 +127,7 @@ const MAPS = [
     water: 'sin',
     duration: 'media',
     description: 'Oro central rodeado de colinas.',
+    image: 'src/assets/img/Maps/rm_gold-pit.png',
     strong: { civ: 'Lituanos', winrate: 54 },
     weak: { civ: 'Godos', winrate: 46 },
     builds: ['Fast Castle Knights']
@@ -233,6 +234,7 @@ const MAPS = [
     water: 'sin',
     duration: 'larga',
     description: 'Pasillos cerrados y choke points.',
+    image: 'src/assets/img/Maps/rm_black-forest.png',
     strong: { civ: 'Teutones', winrate: 54 },
     weak: { civ: 'Hunos', winrate: 46 },
     builds: ['Boom 4 TC']
@@ -342,6 +344,7 @@ const MAPS = [
     water: 'sin',
     duration: 'media',
     description: 'Bases elevadas con defensas naturales.',
+    image: 'src/assets/img/Maps/rm_hill-fort.png',
     strong: { civ: 'Teutones', winrate: 53 },
     weak: { civ: 'Hunos', winrate: 47 },
     builds: ['Fast Castle', 'Defensive Boom']
