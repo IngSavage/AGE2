@@ -1,3 +1,5 @@
+import { registerUser, loginUser, saveToken, getToken, logout, updateAuthUI } from './auth.js';
+
 (async function() {
   const SECTION_FILES = [
     'section-home.html',
@@ -8,7 +10,9 @@
     'section-maps-modes.html',
     'section-stats.html',
     'section-community.html',
-    'section-about.html'
+    'section-about.html',
+    'section-login.html',
+    'section-register.html'
   ];
 
   async function loadSections() {
@@ -207,6 +211,36 @@
     bindHeroButtons();
     bindSearch();
     highlightActiveLink();
+
+    // authentication UI setup
+    updateAuthUI();
+    document.getElementById('login-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const result = await loginUser(email, password);
+      if (result.token) {
+        saveToken(result.token);
+        updateAuthUI();
+        alert('Autenticado con éxito');
+      } else {
+        alert(result.message || 'Error al iniciar sesión');
+      }
+    });
+
+    document.getElementById('register-form')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const result = await registerUser(name, email, password);
+      if (result.success) {
+        alert('Usuario creado, ahora inicie sesión');
+        window.location.hash = '#login';
+      } else {
+        alert(result.message || 'Error al registrarse');
+      }
+    });
   }
 
   document.addEventListener('DOMContentLoaded', init);
