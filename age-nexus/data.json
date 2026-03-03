@@ -1,9 +1,16 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": 1,
+      "username": "Pablo",
+      "passwordHash": "049ec1af7c1332193d602986f2fdad5b4d1c2ff90e5cdc65388c794c1f10226b",
+      "createdAt": "2026-03-03T21:21:33.435Z"
+    }
+  ],
   "sessions": [],
   "messages": [],
   "counters": {
-    "user": 1,
+    "user": 2,
     "message": 1
   }
 }
