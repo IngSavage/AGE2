@@ -17,7 +17,8 @@ function makeMap(m) {
 
     // contenido
     description: m.description ?? '',
-    image: m.image ?? `src/assets/img/Maps/rm_${m.id}.png`,
+    // normalize id for filename: replace hyphens with underscores and lowercase
+    image: m.image ?? `src/assets/img/Maps/rm_${m.id.replace(/-/g, '_').toLowerCase()}.png`,
     strong: m.strong ?? { civ: '—', winrate: '—' },
     weak: m.weak ?? { civ: '—', winrate: '—' },
     builds: Array.isArray(m.builds) ? m.builds : []
@@ -263,6 +264,8 @@ const MAPS = [
     water: 'parcial',
     duration: 'media',
     description: 'Control de lagos tempranos.',
+    // filename on disk uses uppercase extension, so override explicitly
+    image: 'src/assets/img/Maps/rm_four-lakes.PNG',
     strong: { civ: 'Vikingos', winrate: 55 },
     weak: { civ: 'Búlgaros', winrate: 47 },
     builds: ['Water Feudal']
@@ -354,6 +357,8 @@ const MAPS = [
     water: 'sin',
     duration: 'larga',
     description: 'Pasillo central muy estrecho. Late game intenso.',
+    // actual file has extra 's' and underscores
+    image: 'src/assets/img/Maps/rm_amazon_tunnels.png',
     strong: { civ: 'Teutones', winrate: 53 },
     weak: { civ: 'Hunos', winrate: 47 },
     builds: ['Full Boom', 'Fast Imperial']
