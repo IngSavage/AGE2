@@ -4,81 +4,107 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Age Nexus – Atlas Estratégico de Age of Empires</title>
-  
+
   <link rel="stylesheet" href="src/css/base.css">
   <link rel="stylesheet" href="src/css/layout.css">
   <link rel="stylesheet" href="src/css/components.css">
   <link rel="stylesheet" href="src/css/themes.css">
-  
-
 </head>
 <body class="theme-dark">
-
-  <!-- Música de fondo -->
-  <audio id="background-music" autoplay loop>
-    <source src="src/assets/music/background.mp3" type="audio/mpeg">
-    <!-- Fallback si mp3 no es soportado -->
-    <source src="src/assets/music/background.ogg" type="audio/ogg">
-    Tu navegador no soporta el elemento de audio.
-  </audio>
-
-  <header class="topbar">
-    <div class="logo-area">
-      <div class="logo-mark" aria-hidden="true"></div>
-      <span class="logo-text">AGE NEXUS</span>
-    </div>
-
-    <div class="topbar-actions">
-      <div class="search-box">
-        <input type="text" id="global-search" placeholder="Buscar..." aria-label="Buscador global">
-        <button id="search-btn" aria-label="Ejecutar búsqueda">&#128269;</button>
+  <section id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <h1>Accede a Age Nexus</h1>
+      <p>Inicia sesión o crea una cuenta para entrar a la wiki.</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-target="login-form-panel">Login</button>
+        <button class="auth-tab" data-target="signup-form-panel">Sign up</button>
       </div>
-      <div class="volume-control">
-        <button id="mute-toggle" class="icon-btn" aria-label="Silenciar/activar sonido">🔊</button>
+
+      <div id="login-form-panel" class="auth-form active">
+        <form id="login-form">
+          <input id="login-username" type="text" placeholder="Usuario" required>
+          <input id="login-password" type="password" placeholder="Contraseña" required>
+          <button class="btn primary" type="submit">Entrar</button>
+        </form>
       </div>
-      <button id="theme-toggle" class="icon-btn" aria-label="Cambiar tema">&#9788;</button>
-      <button id="menu-toggle" class="hamburger" aria-label="Menú principal">☰</button>
+
+      <div id="signup-form-panel" class="auth-form">
+        <form id="signup-form">
+          <input id="signup-username" type="text" placeholder="Usuario" required>
+          <input id="signup-password" type="password" placeholder="Contraseña (mín. 4)" minlength="4" required>
+          <button class="btn primary" type="submit">Crear cuenta</button>
+        </form>
+      </div>
+
+      <p id="auth-error" class="auth-error"></p>
     </div>
+  </section>
 
-    <nav id="main-nav" class="nav-menu">
-      <a href="#inicio" data-section="inicio" class="nav-link">Inicio</a>
-      <a href="#lore" data-section="lore" class="nav-link">Lore</a>
+  <div id="app-shell" class="hidden">
+    <audio id="background-music" autoplay loop>
+      <source src="src/assets/music/background.mp3" type="audio/mpeg">
+      <source src="src/assets/music/background.ogg" type="audio/ogg">
+      Tu navegador no soporta el elemento de audio.
+    </audio>
 
-      <a href="#civs" data-section="civs" class="nav-link">Civilizaciones</a>
-      <a href="#builds" data-section="builds" class="nav-link">Build Orders</a>
-      <a href="#unidades" data-section="unidades" class="nav-link">Unidades & Tecnologías</a>
-      <a href="#mapas" data-section="mapas" class="nav-link">Mapas & Modos</a>
-      <a href="#stats" data-section="stats" class="nav-link">Estadísticas</a>
-      <a href="#comunidad" data-section="comunidad" class="nav-link">Comunidad</a>
-      <a href="#about" data-section="about" class="nav-link">Acerca de</a>
-    </nav>
-  </header>
+    <header class="topbar">
+      <div class="logo-area">
+        <div class="logo-mark" aria-hidden="true"></div>
+        <span class="logo-text">AGE NEXUS</span>
+      </div>
 
-  <main id="content">
-    </main>
+      <div class="topbar-actions">
+        <div id="auth-user-label" class="auth-user-label"></div>
+        <button id="logout-btn" class="icon-btn" aria-label="Cerrar sesión">Salir</button>
+        <div class="search-box">
+          <input type="text" id="global-search" placeholder="Buscar..." aria-label="Buscador global">
+          <button id="search-btn" aria-label="Ejecutar búsqueda">&#128269;</button>
+        </div>
+        <div class="volume-control">
+          <button id="mute-toggle" class="icon-btn" aria-label="Silenciar/activar sonido">🔊</button>
+        </div>
+        <button id="theme-toggle" class="icon-btn" aria-label="Cambiar tema">&#9788;</button>
+        <button id="menu-toggle" class="hamburger" aria-label="Menú principal">☰</button>
+      </div>
 
-  <footer class="footer">
-    <div class="footer-brand">Age Nexus – Atlas Estratégico de Age of Empires</div>
-    <div class="footer-links">
-      <span>Forjado por estrategas apasionados.</span>
-      <span>Modo <span id="footer-theme-label">oscuro</span>.</span>
-    </div>
-  </footer>
+      <nav id="main-nav" class="nav-menu">
+        <a href="#inicio" data-section="inicio" class="nav-link">Inicio</a>
+        <a href="#lore" data-section="lore" class="nav-link">Lore</a>
+        <a href="#civs" data-section="civs" class="nav-link">Civilizaciones</a>
+        <a href="#builds" data-section="builds" class="nav-link">Build Orders</a>
+        <a href="#unidades" data-section="unidades" class="nav-link">Unidades & Tecnologías</a>
+        <a href="#mapas" data-section="mapas" class="nav-link">Mapas & Modos</a>
+        <a href="#stats" data-section="stats" class="nav-link">Estadísticas</a>
+        <a href="#comunidad" data-section="comunidad" class="nav-link">Comunidad</a>
+        <a href="#about" data-section="about" class="nav-link">Acerca de</a>
+      </nav>
+    </header>
 
-  <script defer src="src/js/ui/ui-lore.js"></script> 
+    <main id="content"></main>
+
+    <footer class="footer">
+      <div class="footer-brand">Age Nexus – Atlas Estratégico de Age of Empires</div>
+      <div class="footer-links">
+        <span>Forjado por estrategas apasionados.</span>
+        <span>Modo <span id="footer-theme-label">oscuro</span>.</span>
+      </div>
+    </footer>
+  </div>
+
+  <script defer src="src/js/ui/ui-lore.js"></script>
   <script defer src="src/js/data/civilizations.js"></script>
   <script defer src="src/js/data/buildorders.js"></script>
   <script defer src="src/js/data/maps.js"></script>
   <script defer src="src/js/data/units.js"></script>
   <script defer src="src/js/data/players.js"></script>
-  
   <script defer src="src/js/data/lore.js"></script>
   <script defer src="src/js/ui/ui-civilizations.js"></script>
   <script defer src="src/js/ui/ui-buildorders.js"></script>
   <script defer src="src/js/ui/ui-maps.js"></script>
   <script defer src="src/js/ui/ui-stats.js"></script>
   <script defer src="src/js/ui/ui-community.js"></script>
-  
+  <script defer src="src/js/api.js"></script>
+  <script defer src="src/js/auth.js"></script>
   <script defer src="src/js/theme.js"></script>
   <script defer src="src/js/audio.js"></script>
   <script defer src="src/js/main.js"></script>
