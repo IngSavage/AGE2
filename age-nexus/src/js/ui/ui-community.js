@@ -1,24 +1,68 @@
 const CommunityUI = (() => {
-  const STORAGE_KEY = 'age-nexus-comments';
+  const supabase = window.Auth?.supabase;
+  const useSupabase = !!supabase;
 
-  const loadComments = () => {
+  const loadComments = async () => {
+    if (useSupabase) {
+      const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.warn('No se pudieron cargar comentarios:', error.message);
+        return [];
+      }
+      return data || [];
+    }
+
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      return JSON.parse(localStorage.getItem('age-nexus-comments') || '[]');
     } catch {
       return [];
     }
   };
 
-  const saveComments = (comments) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+  const saveComment = async (comment) => {
+    if (useSupabase) {
+      const { error } = await supabase.from('comments').insert([comment]);
+      if (error) throw error;
+      return;
+    }
+
+    const all = await loadComments();
+    all.push(comment);
+    localStorage.setItem('age-nexus-comments', JSON.stringify(all));
   };
 
-  const renderComments = () => {
+  const updateComment = async (id, updates) => {
+    if (useSupabase) {
+      const { error } = await supabase.from('comments').update(updates).eq('id', id);
+      if (error) throw error;
+      return;
+    }
+    const all = await loadComments();
+    const idx = all.findIndex((c) => c.id === id);
+    if (idx === -1) return;
+    all[idx] = { ...all[idx], ...updates };
+    localStorage.setItem('age-nexus-comments', JSON.stringify(all));
+  };
+
+  const deleteComment = async (id) => {
+    if (useSupabase) {
+      const { error } = await supabase.from('comments').delete().eq('id', id);
+      if (error) throw error;
+      return;
+    }
+    const all = await loadComments();
+    localStorage.setItem('age-nexus-comments', JSON.stringify(all.filter((c) => c.id !== id)));
+  };
+
+  const renderComments = async () => {
     const list = document.getElementById('comment-list');
     if (!list) return;
 
-    const user = window.Auth?.getCurrentUser();
-    const comments = loadComments();
+    const user = await window.Auth.getUser();
+    const comments = await loadComments();
 
     if (!comments.length) {
       list.innerHTML = '<p class="muted">Sé el primero en comentar.</p>';
@@ -26,15 +70,13 @@ const CommunityUI = (() => {
     }
 
     list.innerHTML = comments
-      .slice()
-      .reverse()
       .map((comment) => {
-        const isOwner = user && comment.user === user;
+        const isOwner = user && comment.user_id === user.id;
         return `
           <div class="comment" data-id="${comment.id}">
             <div class="comment-header">
-              <strong>${comment.user}</strong>
-              <small>${new Date(comment.createdAt).toLocaleString()}</small>
+              <strong>${comment.username}</strong>
+              <small>${new Date(comment.created_at || comment.createdAt).toLocaleString()}</small>
             </div>
             <p>${comment.text}</p>
             ${isOwner ? `<div class="comment-actions">
@@ -58,56 +100,63 @@ const CommunityUI = (() => {
     renderComments();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const textEl = document.getElementById('comment-text');
-    if (!textEl || !textEl.value.trim()) return;
+    const value = textEl?.value.trim();
+    if (!textEl || !value) {
+      alert('Escribe un comentario antes de enviar.');
+      return;
+    }
 
-    const user = window.Auth?.getCurrentUser();
+    const user = await window.Auth.getUser();
     if (!user) {
       return showAuthPrompt();
     }
 
-    const comments = loadComments();
-    comments.push({
-      id: Date.now().toString(),
-      user,
+    const comment = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      user_id: user.id,
+      username: user.email,
       text: textEl.value.trim(),
-      createdAt: new Date().toISOString(),
-    });
-    saveComments(comments);
-    textEl.value = '';
-    renderComments();
+      created_at: new Date().toISOString(),
+    };
+
+    try {
+      await saveComment(comment);
+      textEl.value = '';
+      renderComments();
+    } catch (err) {
+      console.warn('Error al guardar comentario:', err.message);
+    }
   };
 
-  const handleMessageAction = (e) => {
+  const handleMessageAction = async (e) => {
     const button = e.target.closest('button[data-action]');
     if (!button) return;
+
     const message = button.closest('.comment');
     const id = message?.dataset.id;
     if (!id) return;
 
-    const user = window.Auth?.getCurrentUser();
+    const user = await window.Auth.getUser();
     if (!user) return;
 
-    const comments = loadComments();
-    const idx = comments.findIndex((c) => c.id === id);
-    if (idx === -1) return;
+    const comments = await loadComments();
+    const record = comments.find((c) => c.id === id);
+    if (!record) return;
+    if (record.user_id !== user.id) return;
 
     if (button.dataset.action === 'delete') {
-      if (comments[idx].user !== user) return;
-      comments.splice(idx, 1);
-      saveComments(comments);
+      await deleteComment(id);
       renderComments();
       return;
     }
 
     if (button.dataset.action === 'edit') {
-      if (comments[idx].user !== user) return;
-      const nextText = window.prompt('Edita tu comentario:', comments[idx].text);
+      const nextText = window.prompt('Edita tu comentario:', record.text);
       if (!nextText || !nextText.trim()) return;
-      comments[idx].text = nextText.trim();
-      saveComments(comments);
+      await updateComment(id, { text: nextText.trim() });
       renderComments();
     }
   };

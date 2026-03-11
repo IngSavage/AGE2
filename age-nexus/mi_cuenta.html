@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi cuenta · Age Nexus</title>
+  <link rel="stylesheet" href="src/css/base.css">
+  <link rel="stylesheet" href="src/css/layout.css">
+  <link rel="stylesheet" href="src/css/components.css">
+  <link rel="stylesheet" href="src/css/themes.css">
+</head>
+<body class="theme-dark">
+  <main class="page-center">
+    <div class="auth-card">
+      <h1>Mi cuenta</h1>
+      <div id="account-info" class="form">
+        <p>Cuenta: <strong id="account-email"></strong></p>
+        <p>Usuario: <strong id="account-username"></strong></p>
+      </div>
+      <form id="profile-form" class="form">
+        <label for="profile-name">Nombre para mostrar</label>
+        <input id="profile-name" type="text" placeholder="Tu nombre">
+        <button class="btn primary" type="submit">Actualizar perfil</button>
+        <p id="profile-message" class="muted"></p>
+      </form>
+
+      <form id="password-form" class="form">
+        <label for="new-password">Nueva contraseña</label>
+        <input id="new-password" type="password" placeholder="Dejar vacío para no cambiar">
+        <button class="btn primary" type="submit">Cambiar contraseña</button>
+        <p id="password-message" class="muted"></p>
+      </form>
+
+      <button id="logout-btn" class="btn outline">Cerrar sesión</button>
+      <p class="muted"><a href="index.html">Volver a la wiki</a></p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script defer src="src/js/auth.js"></script>
+  <script>
+    async function initAccount() {
+      const user = await window.Auth.getUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('account-email').textContent = user.email || '';
+      document.getElementById('account-username').textContent = user.email || '';
+
+      const profile = await window.Auth.getProfile();
+      if (profile?.full_name) {
+        document.getElementById('profile-name').value = profile.full_name;
+      }
+
+      document.getElementById('profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('profile-name').value.trim();
+        const message = document.getElementById('profile-message');
+        message.textContent = '';
+        if (!name) {
+          message.textContent = 'Ingresa un nombre para mostrar válido.';
+          return;
+        }
+        try {
+          await window.Auth.updateProfile({ full_name: name });
+          message.textContent = 'Perfil actualizado.';
+        } catch (err) {
+          message.textContent = window.Auth.formatError(err);
+        }
+      });
+
+      document.getElementById('password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newPwd = document.getElementById('new-password').value;
+        const message = document.getElementById('password-message');
+        message.textContent = '';
+        if (!newPwd) {
+          message.textContent = 'Ingresa una contraseña para cambiar.';
+          return;
+        }
+        if (newPwd.length < 8) {
+          message.textContent = 'La contraseña debe tener al menos 8 caracteres.';
+          return;
+        }
+        try {
+          await window.Auth.updatePassword(newPwd);
+          message.textContent = 'Contraseña actualizada.';
+          document.getElementById('new-password').value = '';
+        } catch (err) {
+          message.textContent = window.Auth.formatError(err);
+        }
+      });
+
+      document.getElementById('logout-btn').addEventListener('click', async () => {
+        await window.Auth.signOut();
+        window.location.href = 'index.html';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initAccount);
+  </script>
+</body>
+</html>

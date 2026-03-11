@@ -36,6 +36,38 @@ age-nexus/
 2. Abre `age-nexus/index.html` en tu navegador o sirve la carpeta con tu servidor estático favorito (por ejemplo, `python -m http.server`).
 3. La carga de plantillas se realiza vía `fetch`, por lo que si tu navegador restringe `file://` deberás usar un servidor local.
 
+## Configurar autenticación y persistencia (Supabase)
+Para que los usuarios puedan registrarse, iniciar sesión y mantener sus comentarios sincronizados entre dispositivos necesitas conectar el proyecto a tu proyecto de Supabase.
+
+1. En tu proyecto de Supabase, ve a **Settings > API** y copia la **anon public key** (clave pública anónima).
+2. En `src/js/auth.js`, reemplaza `'<REPLACE_WITH_ANON_KEY>'` con esa clave.
+
+### Crear tabla de comentarios
+En Supabase SQL Editor, ejecuta:
+
+```sql
+create table if not exists comments (
+  id text primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  username text,
+  text text,
+  created_at timestamptz default now()
+);
+```
+
+### Crear tabla de perfiles (opcional)
+Para guardar datos adicionales del usuario (nombre, avatar):
+
+```sql
+create table if not exists profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  full_name text,
+  updated_at timestamptz
+);
+```
+
+Una vez hecho esto, los usuarios podrán registrarse, iniciar sesión y guardar sus comentarios, y todo será persistente en la base de datos de Supabase.
+
 ## Imágenes
 - No se incluyen assets reales. Añade tus imágenes en `src/assets/img/` respetando las carpetas de `civs`, `maps`, `units`, `ui` y `logo`.
 - Ejemplos de rutas usadas en el HTML/JS:
@@ -50,5 +82,5 @@ age-nexus/
 - Render dinámico de civilizaciones, build orders, mapas, unidades y estadísticas.
 - Generador de civilización aleatoria y recomendaciones rápidas.
 - Sección de Comunidad con muro de comentarios (requiere registro/ingreso).
-- Autenticación simple (registro/ingreso) guardada en localStorage para permitir comentar.
+- Autenticación y persistencia de comentarios usando Supabase (registro, inicio de sesión, perfil y comentarios se guardan en la nube).
 - Animaciones de hover y tarjetas responsivas con estética inspirada en Age of Empires.

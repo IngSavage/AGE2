@@ -1,80 +1,118 @@
-// Simple client-side auth using localStorage (NOT secure, for demo purposes)
+// Supabase authentication + profile helper.
+// Requires: <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+// Set SUPABASE_ANON_KEY with your project's anon key.
 (function() {
-  const USERS_KEY = 'age-nexus-users';
-  const SESSION_KEY = 'age-nexus-current-user';
+  const SUPABASE_URL = 'https://nzpniblozownzgizuvus.supabase.co';
+  const SUPABASE_ANON_KEY = '<REPLACE_WITH_ANON_KEY>'; // <- reemplaza con tu ANON KEY
 
-  const getUsers = () => {
-    try {
-      return JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-    } catch {
-      return {};
+  const supabase = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const ensureClient = () => {
+    if (!supabase) {
+      console.warn('Supabase no está inicializado. Asegúrate de cargar el script de Supabase antes de auth.js y de configurar la ANON KEY.');
+      return false;
     }
+    return true;
   };
 
-  const setUsers = (users) => {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  };
+  const formatError = (err) => {
+    if (!err) return 'Ocurrió un error inesperado.';
+    const msg = (err.message || err.error_description || String(err)).toString();
+    const normalized = msg.toLowerCase();
 
-  const getCurrentUser = () => {
-    return localStorage.getItem(SESSION_KEY);
-  };
-
-  const setCurrentUser = (username) => {
-    if (!username) {
-      localStorage.removeItem(SESSION_KEY);
-    } else {
-      localStorage.setItem(SESSION_KEY, username);
+    if (normalized.includes('invalid login credentials') || normalized.includes('invalid login')) {
+      return 'Correo o contraseña incorrectos.';
     }
-    notifyAuthChange();
-  };
-
-  const register = (username, password) => {
-    const normalized = (username || '').trim().toLowerCase();
-    if (!normalized || !password) {
-      throw new Error('Usuario y contraseña requeridos');
+    if (normalized.includes('password should be at least')) {
+      return 'La contraseña debe tener al menos 8 caracteres.';
     }
-    const users = getUsers();
-    if (users[normalized]) {
-      throw new Error('El usuario ya existe');
+    if (normalized.includes('user already registered') || normalized.includes('duplicate key value') || normalized.includes('already exists')) {
+      return 'Ya existe una cuenta con ese correo.';
     }
-    users[normalized] = { password };
-    setUsers(users);
-    setCurrentUser(normalized);
-    return normalized;
-  };
-
-  const login = (username, password) => {
-    const normalized = (username || '').trim().toLowerCase();
-    const users = getUsers();
-    const user = users[normalized];
-    if (!user || user.password !== password) {
-      throw new Error('Usuario o contraseña incorrectos');
+    if (normalized.includes('invalid email') || normalized.includes('bad request')) {
+      return 'Ingresa un correo válido.';
     }
-    setCurrentUser(normalized);
-    return normalized;
+    if (normalized.includes('password is required') || normalized.includes('password')) {
+      return 'Ingresa una contraseña válida.';
+    }
+
+    return msg;
   };
 
-  const logout = () => {
-    setCurrentUser(null);
-  };
-
-  const listeners = new Set();
-  const notifyAuthChange = () => {
-    listeners.forEach((cb) => { try { cb(getCurrentUser()); } catch {} });
+  const getUser = async () => {
+    if (!ensureClient()) return null;
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    return user;
   };
 
   const onAuthChange = (cb) => {
-    if (typeof cb !== 'function') return;
-    listeners.add(cb);
-    cb(getCurrentUser());
-    return () => listeners.delete(cb);
+    if (!ensureClient()) return { unsubscribe: () => {} };
+    return supabase.auth.onAuthStateChange((event, session) => {
+      cb(session?.user ?? null);
+    }).subscription;
+  };
+
+  const signUp = async (email, password) => {
+    if (!ensureClient()) throw new Error('Supabase no está inicializado. Verifica que el script se cargue y que hayas puesto la ANON KEY.');
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) throw error;
+    return await getUser();
+  };
+
+  const signIn = async (email, password) => {
+    if (!ensureClient()) throw new Error('Supabase no está inicializado. Verifica que el script se cargue y que hayas puesto la ANON KEY.');
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return await getUser();
+  };
+
+  const signOut = async () => {
+    if (!ensureClient()) throw new Error('Supabase no está inicializado. Verifica que el script se cargue y que hayas puesto la ANON KEY.');
+    await supabase.auth.signOut();
+  };
+
+  const getProfile = async () => {
+    if (!ensureClient()) return null;
+    const user = await getUser();
+    if (!user) return null;
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    if (error) return null;
+    return data;
+  };
+
+  const updateProfile = async (updates) => {
+    if (!ensureClient()) throw new Error('Supabase no está inicializado. Verifica que el script se cargue y que hayas puesto la ANON KEY.');
+    const user = await getUser();
+    if (!user) throw new Error('Usuario no autenticado');
+    const payload = {
+      id: user.id,
+      email: user.email,
+      ...updates,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from('profiles').upsert(payload);
+    if (error) throw error;
+    return payload;
+  };
+
+  const updatePassword = async (newPassword) => {
+    if (!ensureClient()) throw new Error('Supabase no está inicializado. Verifica que el script se cargue y que hayas puesto la ANON KEY.');
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
   };
 
   window.Auth = {
-    getCurrentUser,
-    register,
-    login,
-    logout,
+    getUser,
     onAuthChange,
+    signUp,
+    signIn,
+    signOut,
+    getProfile,
+    updateProfile,
+    updatePassword,
+    formatError,
+    supabase,
   };
 })();

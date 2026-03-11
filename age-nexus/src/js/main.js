@@ -197,11 +197,10 @@
 
     const update = (user) => {
       if (user) {
-        userLabel.textContent = `Hola, ${user}`;
-        authBtn.textContent = 'Cerrar sesión';
+        userLabel.textContent = `Hola, ${user.email || user.user_metadata?.full_name || user.id}`;
+        authBtn.textContent = 'Mi cuenta';
         authBtn.onclick = () => {
-          window.Auth.logout();
-          window.location.href = 'index.html#comunidad';
+          window.location.href = 'mi_cuenta.html';
         };
       } else {
         userLabel.textContent = '';

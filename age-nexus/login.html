@@ -14,8 +14,8 @@
     <div class="auth-card">
       <h1>Iniciar sesión</h1>
       <form id="login-form" class="form">
-        <label for="login-username">Usuario</label>
-        <input id="login-username" type="text" required>
+        <label for="login-username">Correo electrónico</label>
+        <input id="login-username" type="email" required>
         <label for="login-password">Contraseña</label>
         <input id="login-password" type="password" required>
         <button class="btn primary" type="submit">Entrar</button>
@@ -26,23 +26,39 @@
     </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script defer src="src/js/auth.js"></script>
   <script>
+    const isValidEmail = (email) => {
+      return /\S+@\S+\.\S+/.test(email);
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('login-form');
       const errorEl = document.getElementById('login-error');
 
-      form.addEventListener('submit', (e) => {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         errorEl.textContent = '';
 
-        const username = document.getElementById('login-username').value;
+        const email = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value;
+
+        if (!email || !isValidEmail(email)) {
+          errorEl.textContent = 'Ingresa un correo válido.';
+          return;
+        }
+
+        if (!password || password.length < 8) {
+          errorEl.textContent = 'La contraseña debe tener al menos 8 caracteres.';
+          return;
+        }
+
         try {
-          window.Auth.login(username, password);
+          await window.Auth.signIn(email, password);
           window.location.href = 'index.html#comunidad';
         } catch (err) {
-          errorEl.textContent = err.message;
+          errorEl.textContent = window.Auth.formatError(err);
         }
       });
     });
