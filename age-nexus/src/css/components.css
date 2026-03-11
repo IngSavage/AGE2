@@ -269,6 +269,20 @@ form.form textarea {
   font-size: 0.85rem;
 }
 
+.comment-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.comment-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .comment-actions {
   display: flex;
   gap: 8px;

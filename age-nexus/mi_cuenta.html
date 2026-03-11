@@ -16,10 +16,21 @@
       <div id="account-info" class="form">
         <p>Cuenta: <strong id="account-email"></strong></p>
         <p>Usuario: <strong id="account-username"></strong></p>
+        <p id="profile-bio" class="muted"></p>
       </div>
       <form id="profile-form" class="form">
         <label for="profile-name">Nombre para mostrar</label>
         <input id="profile-name" type="text" placeholder="Tu nombre">
+
+        <label for="profile-avatar">URL de avatar</label>
+        <input id="profile-avatar" type="url" placeholder="https://...">
+
+        <label for="profile-country">País</label>
+        <input id="profile-country" type="text" placeholder="Ej. España">
+
+        <label for="profile-bio-input">Biografía breve</label>
+        <textarea id="profile-bio-input" rows="3" placeholder="Una frase sobre ti..."></textarea>
+
         <button class="btn primary" type="submit">Actualizar perfil</button>
         <p id="profile-message" class="muted"></p>
       </form>
@@ -46,17 +57,32 @@
         return;
       }
 
-      document.getElementById('account-email').textContent = user.email || '';
-      document.getElementById('account-username').textContent = user.email || '';
-
       const profile = await window.Auth.getProfile();
+
+      document.getElementById('account-email').textContent = user.email || '';
+      document.getElementById('account-username').textContent = profile?.full_name || user.email || '';
       if (profile?.full_name) {
         document.getElementById('profile-name').value = profile.full_name;
+      }
+      if (profile?.avatar_url) {
+        document.getElementById('profile-avatar').value = profile.avatar_url;
+      }
+      if (profile?.country) {
+        document.getElementById('profile-country').value = profile.country;
+      }
+      if (profile?.bio) {
+        document.getElementById('profile-bio-input').value = profile.bio;
+        document.getElementById('profile-bio').textContent = profile.bio;
+      } else {
+        document.getElementById('profile-bio').textContent = '';
       }
 
       document.getElementById('profile-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('profile-name').value.trim();
+        const avatar = document.getElementById('profile-avatar').value.trim();
+        const country = document.getElementById('profile-country').value.trim();
+        const bio = document.getElementById('profile-bio-input').value.trim();
         const message = document.getElementById('profile-message');
         message.textContent = '';
         if (!name) {
@@ -64,8 +90,14 @@
           return;
         }
         try {
-          await window.Auth.updateProfile({ full_name: name });
+          await window.Auth.updateProfile({
+            full_name: name,
+            avatar_url: avatar || null,
+            country: country || null,
+            bio: bio || null,
+          });
           message.textContent = 'Perfil actualizado.';
+          document.getElementById('profile-bio').textContent = bio;
         } catch (err) {
           message.textContent = window.Auth.formatError(err);
         }

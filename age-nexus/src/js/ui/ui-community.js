@@ -72,11 +72,18 @@ const CommunityUI = (() => {
     list.innerHTML = comments
       .map((comment) => {
         const isOwner = user && comment.user_id === user.id;
+        const createdAt = new Date(comment.created_at || comment.createdAt);
+        const displayName = comment.username || 'Anónimo';
+        const avatar = comment.avatar_url ? `<img class="comment-avatar" src="${comment.avatar_url}" alt="Avatar">` : '';
+
         return `
           <div class="comment" data-id="${comment.id}">
             <div class="comment-header">
-              <strong>${comment.username}</strong>
-              <small>${new Date(comment.created_at || comment.createdAt).toLocaleString()}</small>
+              ${avatar}
+              <div class="comment-meta">
+                <strong>${displayName}</strong>
+                <small>${createdAt.toLocaleString()}</small>
+              </div>
             </div>
             <p>${comment.text}</p>
             ${isOwner ? `<div class="comment-actions">
@@ -114,10 +121,15 @@ const CommunityUI = (() => {
       return showAuthPrompt();
     }
 
+    const profile = await window.Auth.getProfile();
+    const displayName = profile?.full_name || user.email || 'Anónimo';
+    const avatarUrl = profile?.avatar_url || '';
+
     const comment = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       user_id: user.id,
-      username: user.email,
+      username: displayName,
+      avatar_url: avatarUrl,
       text: textEl.value.trim(),
       created_at: new Date().toISOString(),
     };

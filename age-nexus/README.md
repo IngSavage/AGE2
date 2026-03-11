@@ -56,12 +56,15 @@ create table if not exists comments (
 ```
 
 ### Crear tabla de perfiles (opcional)
-Para guardar datos adicionales del usuario (nombre, avatar):
+Para guardar datos adicionales del usuario (nombre, avatar, país, bio):
 
 ```sql
 create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
+  avatar_url text,
+  country text,
+  bio text,
   updated_at timestamptz
 );
 ```
