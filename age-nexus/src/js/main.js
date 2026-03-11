@@ -210,7 +210,12 @@
   }
 
   async function init() {
-    await initApp();
+    const isLogged = await AuthUI.init();
+    if (isLogged) await initApp();
+    window.addEventListener('auth:ready', async () => {
+      if (document.getElementById('content').children.length) return;
+      await initApp();
+    });
   }
 
   document.addEventListener('DOMContentLoaded', init);

@@ -1,116 +1,62 @@
-const AuthUI = (() => {
-  let currentUser = null;
+// authentication helper functions
+function getApiBase() {
+  return window.API_BASE_URL || "";
+}
 
-  function getCurrentUser() {
-    return currentUser;
-  }
+async function registerUser(name, email, password) {
+  const res = await fetch(`${getApiBase()}/api/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password }),
+  });
+  return res.json();
+}
 
-  function updateAuthStatus() {
-    const label = document.getElementById('auth-user-label');
-    if (label) label.textContent = currentUser ? `Hola, ${currentUser.username}` : '';
-  }
+async function loginUser(email, password) {
+  const res = await fetch(`${getApiBase()}/api/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  return res.json();
+}
 
-  function showApp() {
-    document.getElementById('auth-screen')?.classList.add('hidden');
-    document.getElementById('app-shell')?.classList.remove('hidden');
-    updateAuthStatus();
-  }
+function saveToken(token) {
+  localStorage.setItem("authToken", token);
+}
 
-  function showAuth(error = '') {
-    document.getElementById('auth-screen')?.classList.remove('hidden');
-    document.getElementById('app-shell')?.classList.add('hidden');
-    document.getElementById('auth-error').textContent = error;
-  }
+function getToken() {
+  return localStorage.getItem("authToken");
+}
 
-  async function validateSession() {
-    const token = ApiClient.getToken();
-    if (!token) {
-      showAuth();
-      return false;
-    }
+function logout() {
+  localStorage.removeItem("authToken");
+  updateAuthUI();
+}
 
+async function updateAuthUI() {
+  const token = getToken();
+  const authArea = document.getElementById("auth-area");
+  if (!authArea) return;
+  if (token) {
+    // attempt to fetch profile
+    let name = '';
     try {
-      const response = await ApiClient.request('/api/auth/me');
-      currentUser = response.user;
-      showApp();
-      return true;
-    } catch {
-      ApiClient.setToken('');
-      showAuth('Tu sesión expiró. Vuelve a iniciar sesión.');
-      return false;
-    }
-  }
-
-  async function onLoginSubmit(e) {
-    e.preventDefault();
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value;
-
-    try {
-      const response = await ApiClient.request('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ username, password })
+      const res = await fetch(`${getApiBase()}/api/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      ApiClient.setToken(response.token);
-      currentUser = response.user;
-      showApp();
-      window.dispatchEvent(new CustomEvent('auth:ready'));
-    } catch (err) {
-      showAuth(err.message);
+      if (res.ok) {
+        const profile = await res.json();
+        name = profile.name ? ` (${profile.name})` : '';
+      }
+    } catch (e) {
+      console.warn('No se pudo obtener perfil');
     }
+    authArea.innerHTML = `<span>Logged in${name}</span> <button id="logout-btn">Cerrar sesión</button>`;
+    document.getElementById("logout-btn").addEventListener("click", logout);
+  } else {
+    authArea.innerHTML = `<a href="#login" class="nav-link">Login</a> <a href="#register" class="nav-link">Registro</a>`;
   }
+}
 
-  async function onSignupSubmit(e) {
-    e.preventDefault();
-    const username = document.getElementById('signup-username').value.trim();
-    const password = document.getElementById('signup-password').value;
-
-    try {
-      const response = await ApiClient.request('/api/auth/signup', {
-        method: 'POST',
-        body: JSON.stringify({ username, password })
-      });
-      ApiClient.setToken(response.token);
-      currentUser = response.user;
-      showApp();
-      window.dispatchEvent(new CustomEvent('auth:ready'));
-    } catch (err) {
-      showAuth(err.message);
-    }
-  }
-
-  function bindTabs() {
-    const tabs = document.querySelectorAll('.auth-tab');
-    const forms = document.querySelectorAll('.auth-form');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        forms.forEach(f => f.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById(tab.dataset.target)?.classList.add('active');
-        document.getElementById('auth-error').textContent = '';
-      });
-    });
-  }
-
-  async function logout() {
-    try {
-      await ApiClient.request('/api/auth/logout', { method: 'POST' });
-    } catch {
-      // Ignora errores de logout remoto
-    }
-    currentUser = null;
-    ApiClient.setToken('');
-    showAuth();
-  }
-
-  function init() {
-    bindTabs();
-    document.getElementById('login-form')?.addEventListener('submit', onLoginSubmit);
-    document.getElementById('signup-form')?.addEventListener('submit', onSignupSubmit);
-    document.getElementById('logout-btn')?.addEventListener('click', logout);
-    return validateSession();
-  }
-
-  return { init, getCurrentUser };
-})();
+export { registerUser, loginUser, saveToken, getToken, logout, updateAuthUI };

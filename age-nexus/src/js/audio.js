@@ -1,25 +1,23 @@
 (function() {
   const audio = document.getElementById('background-music');
-  const muteBtn = document.getElementById('mute-toggle');
+  const volumeSlider = document.getElementById('volume-slider');
 
-  if (!audio || !muteBtn) return;
+  if (!audio || !volumeSlider) return;
 
-  // Use a low fixed volume and restore mute state from storage
-  audio.volume = 0.1; // nivel bajo fijo
-  const savedMuted = localStorage.getItem('age-nexus-muted');
-  if (savedMuted === 'true') {
-    audio.muted = true;
-    muteBtn.textContent = '🔇';
+  // Restaurar volumen guardado
+  const savedVolume = localStorage.getItem('age-nexus-volume');
+  if (savedVolume !== null) {
+    volumeSlider.value = savedVolume;
+    audio.volume = savedVolume / 100;
   } else {
-    audio.muted = false;
-    muteBtn.textContent = '🔊';
+    audio.volume = 0.3; // 30% por defecto
   }
 
-  // Alternar mute/unmute cuando se hace clic en el botón
-  muteBtn.addEventListener('click', () => {
-    audio.muted = !audio.muted;
-    localStorage.setItem('age-nexus-muted', audio.muted);
-    muteBtn.textContent = audio.muted ? '🔇' : '🔊';
+  // Cambiar volumen cuando el usuario mueve el slider
+  volumeSlider.addEventListener('input', (e) => {
+    const volume = e.target.value / 100;
+    audio.volume = volume;
+    localStorage.setItem('age-nexus-volume', e.target.value);
   });
 
   // Intentar reproducir automáticamente (algunos navegadores lo bloquean)
