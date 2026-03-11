@@ -190,6 +190,31 @@
     });
   }
 
+  function initAuthUI() {
+    const userLabel = document.getElementById('auth-user-label');
+    const authBtn = document.getElementById('auth-action');
+    if (!userLabel || !authBtn || !window.Auth) return;
+
+    const update = (user) => {
+      if (user) {
+        userLabel.textContent = `Hola, ${user}`;
+        authBtn.textContent = 'Cerrar sesión';
+        authBtn.onclick = () => {
+          window.Auth.logout();
+          window.location.href = 'index.html#comunidad';
+        };
+      } else {
+        userLabel.textContent = '';
+        authBtn.textContent = 'Iniciar sesión';
+        authBtn.onclick = () => {
+          window.location.href = 'login.html';
+        };
+      }
+    };
+
+    window.Auth.onAuthChange(update);
+  }
+
   async function initApp() {
     await loadSections();
     if (window.initLore) {
@@ -197,6 +222,7 @@
     }
     bindNavigation();
     initAccordion();
+    initAuthUI();
     CivUI.init();
     BuildUI.init();
     renderUnits();

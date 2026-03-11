@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión · Age Nexus</title>
+  <link rel="stylesheet" href="src/css/base.css">
+  <link rel="stylesheet" href="src/css/layout.css">
+  <link rel="stylesheet" href="src/css/components.css">
+  <link rel="stylesheet" href="src/css/themes.css">
+</head>
+<body class="theme-dark">
+  <main class="page-center">
+    <div class="auth-card">
+      <h1>Iniciar sesión</h1>
+      <form id="login-form" class="form">
+        <label for="login-username">Usuario</label>
+        <input id="login-username" type="text" required>
+        <label for="login-password">Contraseña</label>
+        <input id="login-password" type="password" required>
+        <button class="btn primary" type="submit">Entrar</button>
+        <p class="muted">¿No tienes cuenta? <a href="register.html">Regístrate</a></p>
+        <p id="login-error" class="error"></p>
+      </form>
+      <p class="muted"><a href="index.html">Volver a la wiki</a></p>
+    </div>
+  </main>
+
+  <script defer src="src/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('login-form');
+      const errorEl = document.getElementById('login-error');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        errorEl.textContent = '';
+
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+        try {
+          window.Auth.login(username, password);
+          window.location.href = 'index.html#comunidad';
+        } catch (err) {
+          errorEl.textContent = err.message;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

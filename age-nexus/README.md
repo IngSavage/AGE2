@@ -49,4 +49,6 @@ age-nexus/
 - Buscador global que resalta civilizaciones, builds o mapas y desplaza a la sección.
 - Render dinámico de civilizaciones, build orders, mapas, unidades y estadísticas.
 - Generador de civilización aleatoria y recomendaciones rápidas.
+- Sección de Comunidad con muro de comentarios (requiere registro/ingreso).
+- Autenticación simple (registro/ingreso) guardada en localStorage para permitir comentar.
 - Animaciones de hover y tarjetas responsivas con estética inspirada en Age of Empires.

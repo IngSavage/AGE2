@@ -25,6 +25,10 @@
       </div>
 
       <div class="topbar-actions">
+        <div class="auth-area">
+          <span id="auth-user-label" class="auth-user-label"></span>
+          <button id="auth-action" class="btn outline" type="button">Iniciar sesión</button>
+        </div>
         <div class="search-box">
           <input type="text" id="global-search" placeholder="Buscar..." aria-label="Buscador global">
           <button id="search-btn" aria-label="Ejecutar búsqueda">&#128269;</button>
@@ -60,6 +64,7 @@
     </footer>
   </div>
 
+  <script defer src="src/js/auth.js"></script>
   <script defer src="src/js/ui/ui-lore.js"></script>
   <script defer src="src/js/data/civilizations.js"></script>
   <script defer src="src/js/data/buildorders.js"></script>

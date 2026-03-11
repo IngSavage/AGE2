@@ -5,6 +5,20 @@
     <p>Comparte ideas, pide consejo y recibe recomendaciones al instante.</p>
   </div>
   <div class="community-layout">
+    <div class="message-wall">
+      <h3>Muro de mensajes</h3>
+      <div id="comment-auth" class="comment-auth">
+        <p>Necesitas <a href="login.html">iniciar sesión</a> o <a href="register.html">registrarte</a> para comentar.</p>
+      </div>
+      <div id="comment-panel" class="comment-panel hidden">
+        <form id="comment-form">
+          <textarea id="comment-text" placeholder="Comparte tu estrategia" required></textarea>
+          <button class="btn primary" type="submit">Publicar</button>
+        </form>
+        <div id="comment-list" class="comment-list"></div>
+      </div>
+    </div>
+
     <div class="tools">
       <div class="card">
         <h3>Random Civ Generator</h3>
