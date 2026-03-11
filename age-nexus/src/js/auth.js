@@ -3,7 +3,7 @@
 // Set SUPABASE_ANON_KEY with your project's anon key.
 (function() {
   const SUPABASE_URL = 'https://nzpniblozownzgizuvus.supabase.co';
-  const SUPABASE_ANON_KEY = '<REPLACE_WITH_ANON_KEY>'; // <- reemplaza con tu ANON KEY
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56cG5pYmxvem93bnpnaXp1dnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNjE5ODIsImV4cCI6MjA4ODgzNzk4Mn0.2oY8GTW2Q_c4gPU3nbHt9zzSJYDCo0VOTsI0cGzVONk';
 
   const supabase = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
