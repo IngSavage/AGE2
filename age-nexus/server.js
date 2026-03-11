@@ -6,19 +6,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const messages = [];
-let nextMessageId = 1;
-
 function sendJson(res, status, payload) {
   res.writeHead(status, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(payload));
-}
-
-async function parseBody(req) {
-  let raw = '';
-  for await (const chunk of req) raw += chunk;
-  if (!raw) return {};
-  return JSON.parse(raw);
 }
 
 function serveStatic(req, res) {
@@ -55,28 +45,8 @@ function serveStatic(req, res) {
   fs.createReadStream(target).pipe(res);
 }
 
-const server = http.createServer(async (req, res) => {
+const server = http.createServer((req, res) => {
   try {
-    const pathname = req.url.split('?')[0];
-
-    if (req.method === 'GET' && pathname === '/api/messages') {
-      return sendJson(res, 200, messages.slice().reverse());
-    }
-
-    if (req.method === 'POST' && pathname === '/api/messages') {
-      const { text = '' } = await parseBody(req);
-      if (!text.trim()) return sendJson(res, 400, { error: 'Mensaje requerido' });
-
-      const message = {
-        id: nextMessageId++,
-        text: text.trim(),
-        createdAt: new Date().toISOString(),
-        author: { username: 'Anónimo' }
-      };
-      messages.push(message);
-      return sendJson(res, 201, { id: message.id });
-    }
-
     serveStatic(req, res);
   } catch {
     sendJson(res, 500, { error: 'Error interno del servidor' });
