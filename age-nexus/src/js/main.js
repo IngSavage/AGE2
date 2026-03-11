@@ -195,9 +195,11 @@
     const authBtn = document.getElementById('auth-action');
     if (!userLabel || !authBtn || !window.Auth) return;
 
-    const update = (user) => {
+    const update = async (user) => {
       if (user) {
-        userLabel.textContent = `Hola, ${user.email || user.user_metadata?.full_name || user.id}`;
+        const profile = await window.Auth.getProfile();
+        const displayName = profile?.full_name || user.email || user.id;
+        userLabel.textContent = `Hola, ${displayName}`;
         authBtn.textContent = 'Mi cuenta';
         authBtn.onclick = () => {
           window.location.href = 'mi_cuenta.html';

@@ -110,9 +110,12 @@ const CommunityUI = (() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const textEl = document.getElementById('comment-text');
+    const errorEl = document.getElementById('comment-error');
     const value = textEl?.value.trim();
+    errorEl.textContent = '';
+
     if (!textEl || !value) {
-      alert('Escribe un comentario antes de enviar.');
+      errorEl.textContent = 'Escribe un comentario antes de enviar.';
       return;
     }
 
@@ -126,13 +129,20 @@ const CommunityUI = (() => {
     const avatarUrl = profile?.avatar_url || '';
 
     const comment = {
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       user_id: user.id,
       username: displayName,
-      avatar_url: avatarUrl,
-      text: textEl.value.trim(),
+      text: value,
       created_at: new Date().toISOString(),
     };
+
+    if (!useSupabase) {
+      // localStorage fallback needs an ID
+      comment.id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    if (avatarUrl) {
+      comment.avatar_url = avatarUrl;
+    }
 
     try {
       await saveComment(comment);
@@ -140,6 +150,7 @@ const CommunityUI = (() => {
       renderComments();
     } catch (err) {
       console.warn('Error al guardar comentario:', err.message);
+      errorEl.textContent = window.Auth.formatError(err);
     }
   };
 
@@ -206,6 +217,11 @@ const CommunityUI = (() => {
 
     if (window.Auth?.onAuthChange) {
       window.Auth.onAuthChange(handleAuth);
+      // Asegura que el estado inicial se aplique aunque no haya cambio inmediato
+      (async () => {
+        const user = await window.Auth.getUser();
+        handleAuth(user);
+      })();
     } else {
       showAuthPrompt();
     }
