@@ -82,6 +82,11 @@
     return data;
   };
 
+  const isAdmin = async () => {
+    const profile = await getProfile();
+    return profile?.role?.toLowerCase() === 'admin';
+  };
+
   const updateProfile = async (updates) => {
     if (!ensureClient()) throw new Error('Supabase no está inicializado. Verifica que el script se cargue y que hayas puesto la ANON KEY.');
     const user = await getUser();
@@ -109,6 +114,7 @@
     signIn,
     signOut,
     getProfile,
+    isAdmin,
     updateProfile,
     updatePassword,
     formatError,

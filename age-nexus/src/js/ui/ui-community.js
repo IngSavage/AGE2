@@ -62,7 +62,9 @@ const CommunityUI = (() => {
     if (!list) return;
 
     const user = await window.Auth.getUser();
+    const profile = await window.Auth.getProfile();
     const comments = await loadComments();
+    const isAdmin = profile?.role?.toLowerCase() === 'admin';
 
     if (!comments.length) {
       list.innerHTML = '<p class="muted">Sé el primero en comentar.</p>';
@@ -72,6 +74,7 @@ const CommunityUI = (() => {
     list.innerHTML = comments
       .map((comment) => {
         const isOwner = user && comment.user_id === user.id;
+        const canDelete = isOwner || isAdmin;
         const createdAt = new Date(comment.created_at || comment.createdAt);
         const displayName = comment.username || 'Anónimo';
         const avatar = comment.avatar_url ? `<img class="comment-avatar" src="${comment.avatar_url}" alt="Avatar">` : '';
@@ -81,13 +84,13 @@ const CommunityUI = (() => {
             <div class="comment-header">
               ${avatar}
               <div class="comment-meta">
-                <strong>${displayName}</strong>
+                <strong>${displayName}${isAdmin ? ' <small class="muted">(moderador)</small>' : ''}</strong>
                 <small>${createdAt.toLocaleString()}</small>
               </div>
             </div>
             <p>${comment.text}</p>
-            ${isOwner ? `<div class="comment-actions">
-              <button class="btn outline" data-action="edit">Editar</button>
+            ${canDelete ? `<div class="comment-actions">
+              ${isOwner ? `<button class="btn outline" data-action="edit">Editar</button>` : ''}
               <button class="btn outline" data-action="delete">Eliminar</button>
             </div>` : ''}
           </div>
@@ -165,18 +168,22 @@ const CommunityUI = (() => {
     const user = await window.Auth.getUser();
     if (!user) return;
 
+    const profile = await window.Auth.getProfile();
+    const isAdmin = profile?.role?.toLowerCase() === 'admin';
+
     const comments = await loadComments();
     const record = comments.find((c) => c.id === id);
     if (!record) return;
-    if (record.user_id !== user.id) return;
 
     if (button.dataset.action === 'delete') {
+      if (record.user_id !== user.id && !isAdmin) return;
       await deleteComment(id);
       renderComments();
       return;
     }
 
     if (button.dataset.action === 'edit') {
+      if (record.user_id !== user.id) return;
       const nextText = window.prompt('Edita tu comentario:', record.text);
       if (!nextText || !nextText.trim()) return;
       await updateComment(id, { text: nextText.trim() });
