@@ -114,11 +114,24 @@ const CommunityUI = (() => {
     e.preventDefault();
     const textEl = document.getElementById('comment-text');
     const errorEl = document.getElementById('comment-error');
+    
+    // Aplicamos limpieza de espacios
     const value = textEl?.value.trim();
-    errorEl.textContent = '';
 
+    // Limpiamos errores previos en la UI
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.style.display = 'none';
+    }
+
+    // Validación: Si el texto está vacío
     if (!textEl || !value) {
-      errorEl.textContent = 'Escribe un comentario antes de enviar.';
+      if (errorEl) {
+        errorEl.textContent = 'Escribe un comentario antes de enviar.';
+        errorEl.style.display = 'block';
+      } else {
+        window.alert('Escribe un comentario antes de enviar.');
+      }
       return;
     }
 
@@ -153,7 +166,10 @@ const CommunityUI = (() => {
       renderComments();
     } catch (err) {
       console.warn('Error al guardar comentario:', err.message);
-      errorEl.textContent = window.Auth.formatError(err);
+      if (errorEl) {
+        errorEl.textContent = window.Auth.formatError(err);
+        errorEl.style.display = 'block';
+      }
     }
   };
 
@@ -184,10 +200,29 @@ const CommunityUI = (() => {
 
     if (button.dataset.action === 'edit') {
       if (record.user_id !== user.id) return;
+      
       const nextText = window.prompt('Edita tu comentario:', record.text);
-      if (!nextText || !nextText.trim()) return;
-      await updateComment(id, { text: nextText.trim() });
-      renderComments();
+      
+      // Si el usuario presiona "Cancelar", prompt devuelve null
+      if (nextText === null) return;
+
+      const cleanText = nextText.trim();
+
+      // Validación explícita si intenta guardar un string vacío
+      if (!cleanText) {
+        window.alert('El comentario no puede estar vacío.');
+        return; // Detiene la ejecución para no afectar la base de datos
+      }
+
+      // Optimización: si no hubo cambios reales, no llamamos a la base de datos
+      if (cleanText === record.text) return;
+
+      try {
+        await updateComment(id, { text: cleanText });
+        renderComments();
+      } catch (err) {
+        window.alert('Error al actualizar: ' + err.message);
+      }
     }
   };
 
