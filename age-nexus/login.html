@@ -10,23 +10,30 @@
   <link rel="stylesheet" href="src/css/themes.css">
 </head>
 <body class="theme-dark">
-  <main class="page-center">
-    <div class="auth-card">
-      <h1>Iniciar sesión</h1>
-      <form id="login-form" class="form">
-        <label for="login-username">Correo electrónico</label>
-        <input id="login-username" type="email" required>
-        <label for="login-password">Contraseña</label>
-        <input id="login-password" type="password" required>
-        <button class="btn primary" type="submit">Entrar</button>
-        <p class="muted">¿No tienes cuenta? <a href="register.html">Regístrate</a></p>
-        <p id="login-error" class="error"></p>
-      </form>
-      <p class="muted"><a href="index.html">Volver a la wiki</a></p>
-    </div>
-  </main>
+<main class="page-center">
+  <div class="auth-card">
+    <h1>Iniciar sesión</h1>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <div id="login-success-notice" style="display: none; background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+        <strong>¡Bienvenido!</strong> Has iniciado sesión correctamente. Redirigiendo...
+    </div>
+
+    <form id="login-form" class="form">
+      <label for="login-username">Correo electrónico</label>
+      <input id="login-username" type="email" required>
+      
+      <label for="login-password">Contraseña</label>
+      <input id="login-password" type="password" required>
+      
+      <button id="submit-btn" class="btn primary" type="submit">Iniciar sesión</button>
+      
+      <p class="muted">¿No tienes cuenta? <a href="register.html">Regístrate</a></p>
+      <p id="login-error" class="error"></p>
+    </form>
+    <p class="muted"><a href="index.html">Volver a la wiki</a></p>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script defer src="src/js/auth.js"></script>
   <script>
     const isValidEmail = (email) => {
@@ -36,6 +43,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('login-form');
       const errorEl = document.getElementById('login-error');
+      
+      // 1. Nuevas referencias para el aviso y el botón
+      const noticeEl = document.getElementById('login-success-notice');
+      // Buscamos el botón dentro del formulario para deshabilitarlo durante la carga
+      const submitBtn = form.querySelector('button[type="submit"]'); 
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -54,11 +66,33 @@
           return;
         }
 
+        // 2. Deshabilitar el botón para prevenir múltiples envíos mientras carga
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Iniciando sesión...';
+        }
+
         try {
+          // Llamada a Supabase mediante tu helper
           await window.Auth.signIn(email, password);
-          window.location.href = 'index.html#comunidad';
+          
+          // 3. Ocultar el formulario y mostrar el aviso de éxito
+          form.style.display = 'none';
+          if (noticeEl) noticeEl.style.display = 'block';
+
+          // 4. Esperar 1.5 segundos antes de redirigir a la comunidad
+          setTimeout(() => {
+            window.location.href = 'index.html#comunidad';
+          }, 1500);
+
         } catch (err) {
           errorEl.textContent = window.Auth.formatError(err);
+          
+          // 5. Restaurar el botón si ocurre un error
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Iniciar sesión';
+          }
         }
       });
     });
