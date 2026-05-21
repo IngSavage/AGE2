@@ -13,12 +13,17 @@
   <main class="page-center">
     <div class="auth-card">
       <h1>Registro</h1>
+
+      <div id="email-confirmation-notice" style="display: none; background-color: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+          <strong>¡Registro exitoso!</strong> Por favor, revisa tu bandeja de entrada (o la carpeta de spam) para confirmar tu correo electrónico antes de iniciar sesión.
+      </div>
+
       <form id="register-form" class="form">
         <label for="register-username">Correo electrónico</label>
         <input id="register-username" type="email" required>
         <label for="register-password">Contraseña</label>
         <input id="register-password" type="password" required>
-        <button class="btn primary" type="submit">Crear cuenta</button>
+        <button id="submit-btn" class="btn primary" type="submit">Crear cuenta</button>
         <p class="muted">¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
         <p id="register-error" class="error"></p>
       </form>
@@ -36,6 +41,8 @@
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('register-form');
       const errorEl = document.getElementById('register-error');
+      const noticeEl = document.getElementById('email-confirmation-notice');
+      const submitBtn = document.getElementById('submit-btn');
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -54,11 +61,23 @@
           return;
         }
 
+        // Deshabilitar botón para evitar múltiples envíos
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Registrando...';
+
         try {
+          // Llamada a tu función signUp en src/js/auth.js
           await window.Auth.signUp(email, password);
-          window.location.href = 'index.html#comunidad';
+          
+          // Ocultar el formulario y mostrar el aviso de confirmación de correo
+          form.style.display = 'none';
+          noticeEl.style.display = 'block';
+
         } catch (err) {
           errorEl.textContent = window.Auth.formatError(err);
+          // Restaurar el botón en caso de error
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Crear cuenta';
         }
       });
     });

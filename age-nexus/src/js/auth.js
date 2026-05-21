@@ -56,9 +56,15 @@
 
   const signUp = async (email, password) => {
     if (!ensureClient()) throw new Error('Supabase no está inicializado. Verifica que el script se cargue y que hayas puesto la ANON KEY.');
-    const { error } = await supabase.auth.signUp({ email, password });
+    
+    // Almacenamos 'data' y 'error' de la petición
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    
     if (error) throw error;
-    return await getUser();
+    
+    // Retornamos 'data' directamente. Si la confirmación de correo está activada,
+    // data.session será null, lo que nos indica el estado de "pendiente de confirmación".
+    return data;
   };
 
   const signIn = async (email, password) => {
